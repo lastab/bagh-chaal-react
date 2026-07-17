@@ -48,6 +48,12 @@ export default function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turn, phase, winner, gameMode]);
 
+  const winnerInfo = winner === 'tiger'
+    ? { emoji: '🐯', title: 'Tigers Win!', sub: '5 goats have been captured.' }
+    : winner === 'goat'
+    ? { emoji: '🐐', title: 'Goats Win!', sub: 'All tigers are trapped.' }
+    : null;
+
   if (gameMode === null) {
     return <ModeSelect onSelect={handleModeSelect} />;
   }
@@ -82,6 +88,20 @@ export default function App() {
           isBotTurn={isBotTurn}
         />
       </div>
+
+      {winnerInfo && (
+        <div className={styles.winOverlay}>
+          <div className={styles.winBanner}>
+            <span className={styles.winEmoji}>{winnerInfo.emoji}</span>
+            <h2 className={styles.winTitle}>{winnerInfo.title}</h2>
+            <p className={styles.winSub}>{winnerInfo.sub}</p>
+            <div className={styles.winActions}>
+              <button className={styles.winPlayAgain} onClick={reset}>Play Again</button>
+              <button className={styles.winChangeMode} onClick={() => setGameMode(null)}>Change Mode</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

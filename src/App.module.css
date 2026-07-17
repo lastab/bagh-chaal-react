@@ -69,3 +69,89 @@
     max-width: 100%;
   }
 }
+
+/* ── Win/loss banner overlay ── */
+.winOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.winBanner {
+  background: #1e0f06;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  padding: 36px 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+  animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popIn {
+  from { transform: scale(0.75); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.winEmoji {
+  font-size: 3.5rem;
+  line-height: 1;
+}
+
+.winTitle {
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 900;
+  color: #ffd700;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.winSub {
+  font-size: 0.9rem;
+  color: #c8a96e;
+  text-align: center;
+}
+
+.winActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.winPlayAgain {
+  padding: 10px 24px;
+  border-radius: 10px;
+  border: none;
+  background: #c8501a;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.winPlayAgain:hover  { background: #e06828; }
+.winPlayAgain:active { transform: scale(0.97); }
+
+.winChangeMode {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.08);
+  color: #f5e6c8;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.winChangeMode:hover { background: rgba(255,255,255,0.18); }
