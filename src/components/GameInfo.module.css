@@ -1,0 +1,135 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 16px;
+  width: 100%;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #f5e6c8;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: #c8a96e;
+  margin-top: -12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.status {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  text-align: center;
+  width: 100%;
+  max-width: 360px;
+  color: #f5e6c8;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.winner {
+  background: rgba(255, 215, 0, 0.2);
+  border-color: #ffd700;
+  color: #ffd700;
+  font-weight: 700;
+  font-size: 1.1rem;
+  animation: pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  from { box-shadow: 0 0 0 0 rgba(255,215,0,0.4); }
+  to   { box-shadow: 0 0 0 10px rgba(255,215,0,0); }
+}
+
+.scoreboard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 10px;
+  padding: 10px 20px;
+}
+
+.scoreItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.scoreIcon { font-size: 1.4rem; }
+
+.scoreLabel {
+  font-size: 0.7rem;
+  color: #c8a96e;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.scoreValue {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #f5e6c8;
+}
+
+.divider {
+  width: 1px;
+  height: 40px;
+  background: rgba(255,255,255,0.2);
+}
+
+.resetBtn {
+  padding: 10px 32px;
+  border-radius: 8px;
+  border: none;
+  background: #c8501a;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  letter-spacing: 0.04em;
+}
+
+.resetBtn:hover  { background: #e06020; }
+.resetBtn:active { transform: scale(0.97); }
+
+.rules {
+  width: 100%;
+  max-width: 360px;
+  color: #c8a96e;
+  font-size: 0.88rem;
+}
+
+.rules summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #d4b97a;
+  user-select: none;
+  padding: 4px 0;
+}
+
+.rulesBody {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.rulesBody p { line-height: 1.5; }
+.rulesBody strong { color: #f5e6c8; }
