@@ -8,7 +8,7 @@ const SIZE = 4 * CELL + 2 * PAD; // 440
 const xy = (r, c) => ({ x: PAD + c * CELL, y: PAD + r * CELL });
 const EDGES = getBoardEdges();
 
-export function Board({ board, selected, validMoves, lastCapture, onPointClick }) {
+export function Board({ board, selected, validMoves, lastCapture, onPointClick, isBotTurn }) {
   const validSet = useMemo(
     () => new Set(validMoves.map(m => `${m.row},${m.col}`)),
     [validMoves],
@@ -17,7 +17,11 @@ export function Board({ board, selected, validMoves, lastCapture, onPointClick }
   return (
     <svg
       viewBox={`0 0 ${SIZE} ${SIZE}`}
-      style={{ display: 'block' }}
+      style={{
+        display: 'block',
+        cursor: isBotTurn ? 'wait' : 'default',
+        pointerEvents: isBotTurn ? 'none' : 'auto',
+      }}
       aria-label="Bāgh Chāl game board"
     >
       <defs>
@@ -90,7 +94,6 @@ export function Board({ board, selected, validMoves, lastCapture, onPointClick }
           return (
             <g key={`e${r}${c}`} onClick={() => onPointClick(r, c)} style={{ cursor: isHint ? 'pointer' : 'default' }}>
               <circle cx={x} cy={y} r={9} fill="#c8c0b4" stroke="#a09080" strokeWidth={1.5} />
-              {/* Larger invisible hit area */}
               <circle cx={x} cy={y} r={20} fill="transparent" />
             </g>
           );
@@ -112,18 +115,15 @@ export function Board({ board, selected, validMoves, lastCapture, onPointClick }
               style={{ cursor: 'pointer' }}
               filter="url(#pieceShadow)"
             >
-              {/* Selection ring */}
               {isSel && (
                 <circle cx={x} cy={y} r={30} fill="none" stroke="#ffcc00" strokeWidth={4} opacity={0.9} />
               )}
-              {/* Piece body */}
               <circle
                 cx={x} cy={y} r={24}
                 fill={isTiger ? 'url(#tigerGrad)' : 'url(#goatGrad)'}
                 stroke={isTiger ? '#991100' : '#998877'}
                 strokeWidth={2}
               />
-              {/* Piece icon */}
               <text
                 x={x} y={y + 1}
                 textAnchor="middle" dominantBaseline="middle"

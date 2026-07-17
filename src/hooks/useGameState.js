@@ -29,7 +29,6 @@ function reducer(state, action) {
 
       // ── GOAT TURN ────────────────────────────────────────────────────
       if (state.turn === 'goat') {
-        // Phase 1: place a new goat
         if (state.phase === 'placement') {
           if (state.board[row][col] !== null) return state;
           const board = state.board.map(r => [...r]);
@@ -40,7 +39,6 @@ function reducer(state, action) {
           return { ...state, board, goatsToPlace, phase, winner, turn: winner ? 'goat' : 'tiger', selected: null, validMoves: [], lastCapture: null };
         }
 
-        // Phase 2: move an existing goat
         if (state.selected) {
           const move = state.validMoves.find(m => m.row === row && m.col === col);
           if (move) {
@@ -95,6 +93,46 @@ function reducer(state, action) {
       return state;
     }
 
+    // ── BOT MOVE ─────────────────────────────────────────────────────────
+    case 'BOT_MOVE': {
+      if (state.winner) return state;
+      const { side, from, to, placement } = action;
+
+      if (side === 'tiger') {
+        const board = state.board.map(r => [...r]);
+        board[from.r][from.c] = null;
+        board[to.row][to.col] = 'tiger';
+        let goatsCaptured = state.goatsCaptured;
+        let lastCapture = null;
+        if (to.capture) {
+          board[to.capture.row][to.capture.col] = null;
+          goatsCaptured++;
+          lastCapture = to.capture;
+        }
+        const winner = goatsCaptured >= 5 ? 'tiger' : null;
+        return { ...state, board, goatsCaptured, winner, turn: winner ? 'tiger' : 'goat', selected: null, validMoves: [], lastCapture };
+      }
+
+      if (side === 'goat' && state.phase === 'placement' && placement) {
+        const board = state.board.map(r => [...r]);
+        board[placement.r][placement.c] = 'goat';
+        const goatsToPlace = state.goatsToPlace - 1;
+        const phase = goatsToPlace === 0 ? 'movement' : 'placement';
+        const winner = areTigersBlocked(board) ? 'goat' : null;
+        return { ...state, board, goatsToPlace, phase, winner, turn: winner ? 'goat' : 'tiger', selected: null, validMoves: [], lastCapture: null };
+      }
+
+      if (side === 'goat' && state.phase === 'movement' && from && to) {
+        const board = state.board.map(r => [...r]);
+        board[from.r][from.c] = null;
+        board[to.row][to.col] = 'goat';
+        const winner = areTigersBlocked(board) ? 'goat' : null;
+        return { ...state, board, winner, turn: winner ? 'goat' : 'tiger', selected: null, validMoves: [], lastCapture: null };
+      }
+
+      return state;
+    }
+
     default:
       return state;
   }
@@ -111,5 +149,9 @@ export function useGameState() {
     dispatch({ type: 'RESET' });
   }, []);
 
-  return { ...state, handleClick, reset };
+  const botMove = useCallback((action) => {
+    dispatch({ type: 'BOT_MOVE', ...action });
+  }, []);
+
+  return { ...state, handleClick, reset, botMove };
 }
