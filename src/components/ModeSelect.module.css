@@ -88,3 +88,6 @@
 
 .card.vsBot { border-color: rgba(255, 140, 60, 0.3); }
 .card.vsBot:hover { border-color: rgba(255, 140, 60, 0.7); background: rgba(255, 140, 60, 0.08); }
+
+.card.online { border-color: rgba(80, 200, 120, 0.3); }
+.card.online:hover { border-color: rgba(80, 200, 120, 0.7); background: rgba(80, 200, 120, 0.08); }

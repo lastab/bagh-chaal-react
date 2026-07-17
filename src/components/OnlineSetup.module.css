@@ -1,0 +1,222 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: #1e0f06;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  z-index: 100;
+  padding: 24px;
+}
+
+.heading {
+  text-align: center;
+}
+
+.title {
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 900;
+  color: #f5e6c8;
+}
+
+.sub {
+  font-size: 0.8rem;
+  color: #c8a96e;
+  margin-top: 4px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ── Choice cards ── */
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
+}
+
+.card {
+  flex: 1 1 160px;
+  max-width: 200px;
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, transform 0.12s;
+  color: #f5e6c8;
+}
+.card:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); transform: translateY(-3px); }
+.card:active { transform: translateY(0); }
+
+.cardIcon  { font-size: 2.4rem; line-height: 1; }
+.cardLabel { font-size: 1rem; font-weight: 700; }
+.cardDesc  { font-size: 0.75rem; color: #c8a96e; text-align: center; line-height: 1.4; }
+
+/* ── Form panel (create / join) ── */
+.panel {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 16px;
+  padding: 28px 32px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.panelTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f5e6c8;
+  text-align: center;
+}
+
+/* Side selector */
+.sideRow {
+  display: flex;
+  gap: 10px;
+}
+
+.sideBtn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: #c8a96e;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.sideBtn:hover   { border-color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.1); color: #f5e6c8; }
+.sideBtnActive   { border-color: #c8501a !important; background: rgba(200,80,26,0.2) !important; color: #f5e6c8 !important; }
+
+/* Code input */
+.codeInput {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 2px solid rgba(255,255,255,0.2);
+  background: rgba(0,0,0,0.3);
+  color: #f5e6c8;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-align: center;
+  text-transform: uppercase;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.codeInput::placeholder { color: rgba(245,230,200,0.25); letter-spacing: 0.1em; font-size: 1rem; font-weight: 400; }
+.codeInput:focus { border-color: rgba(255,255,255,0.45); }
+
+/* Error */
+.error {
+  font-size: 0.82rem;
+  color: #ff7070;
+  text-align: center;
+}
+
+/* Primary action button */
+.actionBtn {
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #c8501a;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.actionBtn:hover    { background: #e06828; }
+.actionBtn:active   { transform: scale(0.98); }
+.actionBtn:disabled { opacity: 0.5; cursor: default; }
+
+/* Back link */
+.backBtn {
+  background: none;
+  border: none;
+  color: #c8a96e;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+  align-self: center;
+}
+.backBtn:hover { color: #f5e6c8; }
+
+/* ── Waiting screen ── */
+.waiting {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.waitingLabel {
+  font-size: 0.8rem;
+  color: #c8a96e;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.roomCode {
+  font-size: clamp(2rem, 8vw, 3rem);
+  font-weight: 900;
+  color: #ffd700;
+  letter-spacing: 0.25em;
+  cursor: pointer;
+  position: relative;
+}
+
+.copyHint {
+  font-size: 0.72rem;
+  color: #c8a96e;
+  margin-top: -10px;
+}
+
+.copied {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2d6e2d;
+  color: #aeffae;
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255,255,255,0.15);
+  border-top-color: #c8501a;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.waitingText {
+  color: #c8a96e;
+  font-size: 0.9rem;
+}

@@ -22,6 +22,13 @@ const MODES = [
     desc: 'You control the tigers — bot places & moves goats',
     cls: 'vsBot',
   },
+  {
+    id: 'online',
+    icon: '🌐',
+    label: 'Play Online',
+    desc: 'Challenge a friend over the internet',
+    cls: 'online',
+  },
 ];
 
 export function ModeSelect({ onSelect }) {

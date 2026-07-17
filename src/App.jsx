@@ -1,24 +1,35 @@
 import { useEffect, useState } from 'react';
 import { useGameState } from './hooks/useGameState';
+import { useOnlineGame } from './hooks/useOnlineGame';
 import { Board } from './components/Board';
 import { BottomPanel } from './components/BottomPanel';
 import { ModeSelect } from './components/ModeSelect';
+import { OnlineSetup } from './components/OnlineSetup';
 import { getBestTigerMove, getBestGoatPlacement, getBestGoatMove } from './utils/botLogic';
 import styles from './App.module.css';
 
 export default function App() {
-  const {
-    board, selected, validMoves, lastCapture,
-    turn, phase, goatsToPlace, goatsCaptured, winner,
-    handleClick, reset, botMove,
-  } = useGameState();
+  // null = show mode picker; one of '2player' | 'bot-tiger' | 'bot-goat' | 'online'
+  const [gameMode, setGameMode]         = useState(null);
+  // { roomCode, mySide } when online mode is active
+  const [onlineSession, setOnlineSession] = useState(null);
 
-  // null = show mode picker; one of '2player' | 'bot-tiger' | 'bot-goat'
-  const [gameMode, setGameMode] = useState(null);
+  const localGame  = useGameState();
+  const onlineGame = useOnlineGame(onlineSession?.roomCode, onlineSession?.mySide);
+
+  // Use the right game hook depending on mode
+  const game = gameMode === 'online' ? onlineGame : localGame;
+  const { board, selected, validMoves, lastCapture, turn, phase,
+          goatsToPlace, goatsCaptured, winner, handleClick, reset, botMove } = game;
 
   const handleModeSelect = (mode) => {
     setGameMode(mode);
-    reset();
+    setOnlineSession(null);
+    localGame.reset();
+  };
+
+  const handleOnlineSession = (roomCode, mySide) => {
+    setOnlineSession({ roomCode, mySide });
   };
 
   const isBotTurn =
@@ -27,7 +38,7 @@ export default function App() {
 
   // Trigger bot move 480ms after each turn change
   useEffect(() => {
-    if (!gameMode || gameMode === '2player' || winner || !isBotTurn) return;
+    if (!gameMode || gameMode === '2player' || gameMode === 'online' || winner || !isBotTurn) return;
 
     const timer = setTimeout(() => {
       if (turn === 'tiger') {
@@ -54,15 +65,35 @@ export default function App() {
     ? { emoji: '🐐', title: 'Goats Win!', sub: 'All tigers are trapped.' }
     : null;
 
+  // ── Routing ──────────────────────────────────────────────────────────────────
   if (gameMode === null) {
     return <ModeSelect onSelect={handleModeSelect} />;
   }
+
+  if (gameMode === 'online' && !onlineSession) {
+    return (
+      <OnlineSetup
+        onSession={handleOnlineSession}
+        onBack={() => setGameMode(null)}
+      />
+    );
+  }
+
+  // Online: wait for opponent connection
+  const isOnlineWaiting = gameMode === 'online' && !onlineGame.opponentConnected;
+
+  // Online: block interaction when it's not my turn
+  const isMyTurn = gameMode !== 'online' || turn === onlineSession?.mySide;
 
   return (
     <div className={styles.app}>
       <header className={styles.header}>
         <h1 className={styles.title}>Bāgh Chāl</h1>
-        <span className={styles.subtitle}>Tigers &amp; Goats</span>
+        <span className={styles.subtitle}>
+          {gameMode === 'online'
+            ? `You: ${onlineSession?.mySide === 'goat' ? '🐐 Goat' : '🐯 Tiger'} · Room: ${onlineSession?.roomCode}`
+            : 'Tigers & Goats'}
+        </span>
       </header>
 
       <div className={styles.gameArea}>
@@ -73,7 +104,7 @@ export default function App() {
             validMoves={validMoves}
             lastCapture={lastCapture}
             onPointClick={handleClick}
-            isBotTurn={isBotTurn}
+            isBotTurn={isBotTurn || !isMyTurn || isOnlineWaiting}
           />
         </main>
 
@@ -84,8 +115,10 @@ export default function App() {
           goatsCaptured={goatsCaptured}
           winner={winner}
           onReset={reset}
-          onChangeMode={() => setGameMode(null)}
+          onChangeMode={() => { setGameMode(null); setOnlineSession(null); }}
           isBotTurn={isBotTurn}
+          isOnlineWaiting={isOnlineWaiting}
+          isMyTurn={isMyTurn}
         />
       </div>
 
@@ -97,7 +130,7 @@ export default function App() {
             <p className={styles.winSub}>{winnerInfo.sub}</p>
             <div className={styles.winActions}>
               <button className={styles.winPlayAgain} onClick={reset}>Play Again</button>
-              <button className={styles.winChangeMode} onClick={() => setGameMode(null)}>Change Mode</button>
+              <button className={styles.winChangeMode} onClick={() => { setGameMode(null); setOnlineSession(null); }}>Change Mode</button>
             </div>
           </div>
         </div>

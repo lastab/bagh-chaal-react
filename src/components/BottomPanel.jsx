@@ -2,13 +2,15 @@ import styles from './BottomPanel.module.css';
 
 const TOTAL_GOATS = 20;
 
-export function BottomPanel({ turn, phase, goatsToPlace, goatsCaptured, winner, onReset, onChangeMode, isBotTurn }) {
+export function BottomPanel({ turn, phase, goatsToPlace, goatsCaptured, winner, onReset, onChangeMode, isBotTurn, isOnlineWaiting, isMyTurn }) {
   const onBoard = TOTAL_GOATS - goatsToPlace - goatsCaptured;
 
   const statusText = () => {
     if (winner === 'tiger') return '🐯 Tigers win! 5 goats captured.';
     if (winner === 'goat')  return '🐐 Goats win! All tigers are trapped.';
-    if (isBotTurn) return turn === 'tiger' ? '🐯 Bot is thinking…' : '🐐 Bot is thinking…';
+    if (isOnlineWaiting)    return '⏳ Waiting for opponent…';
+    if (isBotTurn)          return turn === 'tiger' ? '🐯 Bot is thinking…' : '🐐 Bot is thinking…';
+    if (isMyTurn === false) return turn === 'goat' ? '🐐 Opponent\'s turn' : '🐯 Opponent\'s turn';
     if (turn === 'goat' && phase === 'placement')
       return `🐐 Place a goat — ${goatsToPlace} remaining`;
     if (turn === 'goat') return '🐐 Move a goat';
