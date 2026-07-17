@@ -23,11 +23,18 @@ const MODES = [
     cls: 'vsBot',
   },
   {
-    id: 'online',
-    icon: '🌐',
-    label: 'Play Online',
-    desc: 'Challenge a friend over the internet',
+    id: 'quick-match',
+    icon: '⚡',
+    label: 'Quick Match',
+    desc: 'Get matched with a random opponent online',
     cls: 'online',
+  },
+  {
+    id: 'private-match',
+    icon: '🔒',
+    label: 'Private Match',
+    desc: 'Play online with a friend using a room code',
+    cls: 'private',
   },
 ];
 

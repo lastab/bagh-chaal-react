@@ -91,3 +91,6 @@
 
 .card.online { border-color: rgba(80, 200, 120, 0.3); }
 .card.online:hover { border-color: rgba(80, 200, 120, 0.7); background: rgba(80, 200, 120, 0.08); }
+
+.card.private { border-color: rgba(140, 160, 255, 0.3); }
+.card.private:hover { border-color: rgba(140, 160, 255, 0.7); background: rgba(140, 160, 255, 0.08); }

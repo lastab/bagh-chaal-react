@@ -5,6 +5,7 @@ import { Board } from './components/Board';
 import { BottomPanel } from './components/BottomPanel';
 import { ModeSelect } from './components/ModeSelect';
 import { OnlineSetup } from './components/OnlineSetup';
+import { QuickMatch } from './components/QuickMatch';
 import { getBestTigerMove, getBestGoatPlacement, getBestGoatMove } from './utils/botLogic';
 import styles from './App.module.css';
 
@@ -14,11 +15,13 @@ export default function App() {
   // { roomCode, mySide } when online mode is active
   const [onlineSession, setOnlineSession] = useState(null);
 
+  const isOnlineMode = gameMode === 'quick-match' || gameMode === 'private-match';
+
   const localGame  = useGameState();
   const onlineGame = useOnlineGame(onlineSession?.roomCode, onlineSession?.mySide);
 
   // Use the right game hook depending on mode
-  const game = gameMode === 'online' ? onlineGame : localGame;
+  const game = isOnlineMode ? onlineGame : localGame;
   const { board, selected, validMoves, lastCapture, turn, phase,
           goatsToPlace, goatsCaptured, winner, handleClick, reset, botMove } = game;
 
@@ -38,7 +41,7 @@ export default function App() {
 
   // Trigger bot move 480ms after each turn change
   useEffect(() => {
-    if (!gameMode || gameMode === '2player' || gameMode === 'online' || winner || !isBotTurn) return;
+    if (!gameMode || gameMode === '2player' || isOnlineMode || winner || !isBotTurn) return;
 
     const timer = setTimeout(() => {
       if (turn === 'tiger') {
@@ -70,28 +73,27 @@ export default function App() {
     return <ModeSelect onSelect={handleModeSelect} />;
   }
 
-  if (gameMode === 'online' && !onlineSession) {
-    return (
-      <OnlineSetup
-        onSession={handleOnlineSession}
-        onBack={() => setGameMode(null)}
-      />
-    );
+  if (gameMode === 'quick-match' && !onlineSession) {
+    return <QuickMatch onSession={handleOnlineSession} onBack={() => setGameMode(null)} />;
+  }
+
+  if (gameMode === 'private-match' && !onlineSession) {
+    return <OnlineSetup onSession={handleOnlineSession} onBack={() => setGameMode(null)} />;
   }
 
   // Online: wait for opponent connection
-  const isOnlineWaiting = gameMode === 'online' && !onlineGame.opponentConnected;
+  const isOnlineWaiting = isOnlineMode && !onlineGame.opponentConnected;
 
   // Online: block interaction when it's not my turn
-  const isMyTurn = gameMode !== 'online' || turn === onlineSession?.mySide;
+  const isMyTurn = !isOnlineMode || turn === onlineSession?.mySide;
 
   return (
     <div className={styles.app}>
       <header className={styles.header}>
         <h1 className={styles.title}>Bāgh Chāl</h1>
         <span className={styles.subtitle}>
-          {gameMode === 'online'
-            ? `You: ${onlineSession?.mySide === 'goat' ? '🐐 Goat' : '🐯 Tiger'} · Room: ${onlineSession?.roomCode}`
+          {isOnlineMode
+            ? `${onlineSession?.mySide === 'goat' ? '🐐 Goat' : '🐯 Tiger'} · ${gameMode === 'quick-match' ? '⚡ Quick Match' : `🔒 ${onlineSession?.roomCode}`}`
             : 'Tigers & Goats'}
         </span>
       </header>
