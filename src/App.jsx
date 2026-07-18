@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useGameState } from './hooks/useGameState';
 import { useOnlineGame } from './hooks/useOnlineGame';
 import { Board } from './components/Board';
@@ -7,6 +7,7 @@ import { ModeSelect } from './components/ModeSelect';
 import { OnlineSetup } from './components/OnlineSetup';
 import { QuickMatch } from './components/QuickMatch';
 import { getBestTigerMove, getBestGoatPlacement, getBestGoatMove } from './utils/botLogic';
+import { getTigerMoves, getGoatMoves } from './utils/gameLogic';
 import { forfeitGame } from './lib/roomService';
 import styles from './App.module.css';
 
@@ -150,6 +151,33 @@ export default function App() {
     };
   })();
 
+  // Online: wait for opponent connection
+  const isOnlineWaiting = isOnlineMode && !onlineGame.opponentConnected;
+
+  // Online: block interaction when it's not my turn
+  const isMyTurn = !isOnlineMode || turn === onlineSession?.mySide;
+
+  // Pieces the current human player can move (shown as pulsing hints)
+  // Must be declared before any early returns to satisfy Rules of Hooks
+  const movablePieces = useMemo(() => {
+    if (isBotTurn || !isMyTurn || isOnlineWaiting || winner || selected) return [];
+    if (turn === 'tiger') {
+      const out = [];
+      board.forEach((row, r) => row.forEach((cell, c) => {
+        if (cell === 'tiger' && getTigerMoves(board, r, c).length > 0) out.push({ row: r, col: c });
+      }));
+      return out;
+    }
+    if (turn === 'goat' && phase === 'movement') {
+      const out = [];
+      board.forEach((row, r) => row.forEach((cell, c) => {
+        if (cell === 'goat' && getGoatMoves(board, r, c).length > 0) out.push({ row: r, col: c });
+      }));
+      return out;
+    }
+    return [];
+  }, [board, turn, phase, winner, isBotTurn, isMyTurn, isOnlineWaiting, selected]);
+
   // ── Routing ──────────────────────────────────────────────────────────────────
   if (gameMode === null) {
     return <ModeSelect onSelect={handleModeSelect} />;
@@ -162,12 +190,6 @@ export default function App() {
   if (gameMode === 'private-match' && !onlineSession) {
     return <OnlineSetup onSession={handleOnlineSession} onBack={() => setGameMode(null)} />;
   }
-
-  // Online: wait for opponent connection
-  const isOnlineWaiting = isOnlineMode && !onlineGame.opponentConnected;
-
-  // Online: block interaction when it's not my turn
-  const isMyTurn = !isOnlineMode || turn === onlineSession?.mySide;
 
   return (
     <div className={styles.app}>
@@ -187,6 +209,8 @@ export default function App() {
             selected={selected}
             validMoves={validMoves}
             lastCapture={lastCapture}
+            movablePieces={movablePieces}
+            placementMode={turn === 'goat' && phase === 'placement' && !isBotTurn && isMyTurn && !isOnlineWaiting && !winner}
             onPointClick={handleClick}
             isBotTurn={isBotTurn || !isMyTurn || isOnlineWaiting}
           />

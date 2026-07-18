@@ -16,12 +16,13 @@ export function QuickMatch({ onSession, onBack }) {
   }
   useEffect(() => cleanup, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function startSearch() {
+  async function startSearch(side) {
+    setPick(side);
     setStage('searching');
     setError('');
 
     try {
-      const { myId, roomCode, resolvedSide } = await searchForMatch(pick);
+      const { myId, roomCode, resolvedSide } = await searchForMatch(side);
       myIdRef.current = myId;
 
       if (roomCode) {
@@ -94,35 +95,17 @@ export function QuickMatch({ onSession, onBack }) {
       <div className={styles.panel}>
         <p className={styles.panelTitle}>⚡ Quick Match</p>
         <p style={{ fontSize: '0.82rem', color: '#c8a96e', textAlign: 'center' }}>
-          Pick your side — we'll find an opponent for you
+          Pick your side to start searching
         </p>
 
         <div className={styles.sideRow}>
-          <button
-            className={`${styles.sideBtn} ${pick === 'goat' ? styles.sideBtnActive : ''}`}
-            onClick={() => setPick('goat')}
-          >🐐 Goat</button>
-          <button
-            className={`${styles.sideBtn} ${pick === 'random' ? styles.sideBtnActive : ''}`}
-            onClick={() => setPick('random')}
-          >🎲 Random</button>
-          <button
-            className={`${styles.sideBtn} ${pick === 'tiger' ? styles.sideBtnActive : ''}`}
-            onClick={() => setPick('tiger')}
-          >🐯 Tiger</button>
+          <button className={styles.sideBtn} onClick={() => startSearch('goat')}>🐐 Goat</button>
+          <button className={styles.sideBtn} onClick={() => startSearch('random')}>🎲 Random</button>
+          <button className={styles.sideBtn} onClick={() => startSearch('tiger')}>🐯 Tiger</button>
         </div>
-
-        {pick === 'random' && (
-          <p style={{ fontSize: '0.75rem', color: '#c8a96e', textAlign: 'center', marginTop: -4 }}>
-            Side assigned after finding a match — pairs with anyone
-          </p>
-        )}
 
         {error && <p className={styles.error}>{error}</p>}
 
-        <button className={styles.actionBtn} onClick={startSearch}>
-          Find Match
-        </button>
         <button className={styles.backBtn} onClick={onBack}>← Back</button>
       </div>
     </div>

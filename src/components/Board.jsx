@@ -8,10 +8,14 @@ const SIZE = 4 * CELL + 2 * PAD; // 440
 const xy = (r, c) => ({ x: PAD + c * CELL, y: PAD + r * CELL });
 const EDGES = getBoardEdges();
 
-export function Board({ board, selected, validMoves, lastCapture, onPointClick, isBotTurn }) {
+export function Board({ board, selected, validMoves, lastCapture, movablePieces = [], placementMode = false, onPointClick, isBotTurn }) {
   const validSet = useMemo(
     () => new Set(validMoves.map(m => `${m.row},${m.col}`)),
     [validMoves],
+  );
+  const movableSet = useMemo(
+    () => new Set((movablePieces || []).map(m => `${m.row},${m.col}`)),
+    [movablePieces],
   );
 
   return (
@@ -36,6 +40,13 @@ export function Board({ board, selected, validMoves, lastCapture, onPointClick, 
         <filter id="pieceShadow">
           <feDropShadow dx="1" dy="2" stdDeviation="2" floodOpacity="0.35" />
         </filter>
+        <style>{`
+          @keyframes movablePulse {
+            0%, 100% { opacity: 0.3; r: 29; }
+            50%       { opacity: 0.85; r: 32; }
+          }
+          .movable-ring { animation: movablePulse 1.2s ease-in-out infinite; }
+        `}</style>
       </defs>
 
       {/* Board background */}
@@ -91,9 +102,15 @@ export function Board({ board, selected, validMoves, lastCapture, onPointClick, 
           const { x, y } = xy(r, c);
           if (cell) return null;
           const isHint = validSet.has(`${r},${c}`);
+          const canPlace = placementMode;
           return (
-            <g key={`e${r}${c}`} onClick={() => onPointClick(r, c)} style={{ cursor: isHint ? 'pointer' : 'default' }}>
-              <circle cx={x} cy={y} r={9} fill="#c8c0b4" stroke="#a09080" strokeWidth={1.5} />
+            <g key={`e${r}${c}`} onClick={() => onPointClick(r, c)} style={{ cursor: isHint || canPlace ? 'pointer' : 'default' }}>
+              <circle
+                cx={x} cy={y} r={canPlace ? 11 : 9}
+                fill={canPlace ? 'rgba(50,190,90,0.35)' : '#c8c0b4'}
+                stroke={canPlace ? '#22cc55' : '#a09080'}
+                strokeWidth={canPlace ? 2 : 1.5}
+              />
               <circle cx={x} cy={y} r={20} fill="transparent" />
             </g>
           );
@@ -105,8 +122,9 @@ export function Board({ board, selected, validMoves, lastCapture, onPointClick, 
         row.map((cell, c) => {
           if (!cell) return null;
           const { x, y } = xy(r, c);
-          const isTiger = cell === 'tiger';
-          const isSel   = selected?.row === r && selected?.col === c;
+          const isTiger    = cell === 'tiger';
+          const isSel      = selected?.row === r && selected?.col === c;
+          const isMovable  = !isSel && movableSet.has(`${r},${c}`);
 
           return (
             <g
@@ -117,6 +135,15 @@ export function Board({ board, selected, validMoves, lastCapture, onPointClick, 
             >
               {isSel && (
                 <circle cx={x} cy={y} r={30} fill="none" stroke="#ffcc00" strokeWidth={4} opacity={0.9} />
+              )}
+              {isMovable && (
+                <circle
+                  className="movable-ring"
+                  cx={x} cy={y} r={29}
+                  fill="none"
+                  stroke={isTiger ? '#ff9944' : '#44aaff'}
+                  strokeWidth={3}
+                />
               )}
               <circle
                 cx={x} cy={y} r={24}
