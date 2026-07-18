@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useGameState } from './hooks/useGameState';
 import { useOnlineGame } from './hooks/useOnlineGame';
+import { useAudio } from './hooks/useAudio';
 import { Board } from './components/Board';
 import { BottomPanel } from './components/BottomPanel';
 import { ModeSelect } from './components/ModeSelect';
@@ -23,6 +24,8 @@ export default function App() {
   const [botDifficulty, setBotDifficulty]   = useState('medium');
   const [showHelp, setShowHelp]             = useState(false);
 
+  const { muted, toggleMute, startBgm, resumeBgm, stopBgm, playSound } = useAudio();
+
   const isOnlineMode = gameMode === 'quick-match' || gameMode === 'private-match';
 
   const localGame  = useGameState();
@@ -41,6 +44,7 @@ export default function App() {
     setGameMode(mode);
     setOnlineSession(null);
     localGame.reset();
+    startBgm();
     if (mode === '2player') setShowSideBanner(true);
   };
 
@@ -50,6 +54,7 @@ export default function App() {
     setGameMode(pendingBotMode);
     setOnlineSession(null);
     localGame.reset();
+    startBgm();
     setShowSideBanner(true);
   };
 
@@ -93,6 +98,40 @@ export default function App() {
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turn, phase, winner, gameMode]);
+
+  // ── Sound effects ─────────────────────────────────────────────────────────
+  const prevGoatsCaptured = useRef(0);
+  const prevGoatsToPlace  = useRef(20);
+  const prevBoard         = useRef(null);
+  const prevWinner        = useRef(null);
+
+  useEffect(() => {
+    if (!gameMode) return;
+
+    if (winner && !prevWinner.current) {
+      playSound('win');
+      stopBgm();
+    } else if (prevBoard.current && prevBoard.current !== board) {
+      const didCapture = goatsCaptured > prevGoatsCaptured.current;
+      const didPlace   = goatsToPlace  < prevGoatsToPlace.current;
+      if (didCapture)      playSound('capture');
+      else if (didPlace)   playSound('place');
+      else                 playSound('move');
+    }
+
+    prevGoatsCaptured.current = goatsCaptured;
+    prevGoatsToPlace.current  = goatsToPlace;
+    prevBoard.current         = board;
+    prevWinner.current        = winner;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [board, winner]);
+
+  // BGM: start when game begins, resume/stop on mute toggle
+  useEffect(() => {
+    if (gameMode && !winner) resumeBgm();
+    else if (!gameMode || winner) stopBgm();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameMode, winner, muted]);
 
   // Auto-redirect to Quick Match when opponent leaves
   useEffect(() => {
@@ -266,6 +305,9 @@ export default function App() {
             ? `${onlineSession?.mySide === 'goat' ? '🐐 Goat' : '🐯 Tiger'} · ${gameMode === 'quick-match' ? '⚡ Quick Match' : `🔒 ${onlineSession?.roomCode}`}`
             : 'Tigers & Goats'}
         </span>
+        <button className={styles.muteBtn} onClick={toggleMute} title={muted ? 'Unmute' : 'Mute'}>
+          {muted ? '🔇' : '🔊'}
+        </button>
         <button className={styles.helpBtn} onClick={() => setShowHelp(true)} title="How to play">?</button>
       </header>
 

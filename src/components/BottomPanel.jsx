@@ -40,7 +40,8 @@ export function BottomPanel({ turn, phase, goatsToPlace, goatsCaptured, winner, 
               i < goatsCaptured ? 'Captured' :
               i < goatsCaptured + onBoard ? 'On board' : 'In reserve'
             }>
-              🐐
+              <span className={i < goatsCaptured ? styles.capturedGoatIcon : ''}>🐐</span>
+              {i < goatsCaptured && <span className={styles.crossMark}>✕</span>}
             </span>
           );
         })}
