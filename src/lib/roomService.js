@@ -1,4 +1,4 @@
-import { ref, set, get, update, onValue } from 'firebase/database';
+import { ref, set, get, update, onValue, remove } from 'firebase/database';
 import { db } from './firebase';
 import { createInitialBoard } from '../utils/gameLogic';
 
@@ -53,4 +53,11 @@ export async function pushGameState(code, gameState) {
 
 export async function resetGame(code) {
   await set(ref(db, `rooms/${code}/gameState`), freshGameState());
+}
+
+export async function forfeitGame(code, forfeitedBy) {
+  await update(ref(db, `rooms/${code}/gameState`), {
+    winner: forfeitedBy === 'goat' ? 'tiger' : 'goat',
+    forfeitedBy,
+  });
 }
