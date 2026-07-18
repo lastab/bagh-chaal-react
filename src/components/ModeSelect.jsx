@@ -38,7 +38,7 @@ const MODES = [
   },
 ];
 
-export function ModeSelect({ onSelect }) {
+export function ModeSelect({ onSelect, onHelp }) {
   return (
     <div className={styles.overlay}>
       <div className={styles.heading}>
@@ -58,6 +58,11 @@ export function ModeSelect({ onSelect }) {
             <span className={styles.desc}>{m.desc}</span>
           </button>
         ))}
+        <button className={`${styles.card} ${styles.help}`} onClick={onHelp}>
+          <span className={styles.icon}>❓</span>
+          <span className={styles.label}>How to Play</span>
+          <span className={styles.desc}>Rules, tips, and game modes explained</span>
+        </button>
       </div>
     </div>
   );

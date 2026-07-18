@@ -92,22 +92,32 @@ export function QuickMatch({ onSession, onBack }) {
 
   return (
     <div className={styles.overlay}>
-      <div className={styles.panel}>
-        <p className={styles.panelTitle}>⚡ Quick Match</p>
-        <p style={{ fontSize: '0.82rem', color: '#c8a96e', textAlign: 'center' }}>
-          Pick your side to start searching
-        </p>
-
-        <div className={styles.sideRow}>
-          <button className={styles.sideBtn} onClick={() => startSearch('goat')}>🐐 Goat</button>
-          <button className={styles.sideBtn} onClick={() => startSearch('random')}>🎲 Random</button>
-          <button className={styles.sideBtn} onClick={() => startSearch('tiger')}>🐯 Tiger</button>
-        </div>
-
-        {error && <p className={styles.error}>{error}</p>}
-
-        <button className={styles.backBtn} onClick={onBack}>← Back</button>
+      <div className={styles.heading}>
+        <h2 className={styles.title}>⚡ Quick Match</h2>
+        <p className={styles.sub}>Pick your side to start searching</p>
       </div>
+
+      <div className={styles.cards}>
+        <button className={styles.card} onClick={() => startSearch('goat')}>
+          <span className={styles.cardIcon}>🐐</span>
+          <span className={styles.cardLabel}>Goat</span>
+          <span className={styles.cardDesc}>Trap all 4 tigers to win</span>
+        </button>
+        <button className={styles.card} onClick={() => startSearch('random')}>
+          <span className={styles.cardIcon}>🎲</span>
+          <span className={styles.cardLabel}>Random</span>
+          <span className={styles.cardDesc}>Side assigned after match</span>
+        </button>
+        <button className={styles.card} onClick={() => startSearch('tiger')}>
+          <span className={styles.cardIcon}>🐯</span>
+          <span className={styles.cardLabel}>Tiger</span>
+          <span className={styles.cardDesc}>Capture 5 goats to win</span>
+        </button>
+      </div>
+
+      {error && <p className={styles.error}>{error}</p>}
+
+      <button className={styles.backBtn} onClick={onBack}>← Back to mode select</button>
     </div>
   );
 }

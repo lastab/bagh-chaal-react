@@ -27,8 +27,8 @@ export function OnlineSetup({ onSession, onBack }) {
   return (
     <div className={styles.overlay}>
       <div className={styles.heading}>
-        <h2 className={styles.title}>Play Online</h2>
-        <p className={styles.sub}>Share a code with your friend</p>
+        <h2 className={styles.title}>🔒 Private Match</h2>
+        <p className={styles.sub}>Play online with a friend</p>
       </div>
 
       <div className={styles.cards}>
@@ -40,7 +40,7 @@ export function OnlineSetup({ onSession, onBack }) {
         <button className={styles.card} onClick={() => setView('join')}>
           <span className={styles.cardIcon}>🔗</span>
           <span className={styles.cardLabel}>Join Game</span>
-          <span className={styles.cardDesc}>Enter a friend's room code</span>
+          <span className={styles.cardDesc}>Enter a friend's room code to join</span>
         </button>
       </div>
 
@@ -51,22 +51,24 @@ export function OnlineSetup({ onSession, onBack }) {
 
 // ── Create flow ───────────────────────────────────────────────────────────────
 function CreateGame({ onSession, onBack }) {
-  const [side, setSide]         = useState('goat');
+  const [side, setSide]         = useState(null);   // null until picked
   const [status, setStatus]     = useState('idle'); // idle | creating | waiting
   const [roomCode, setRoomCode] = useState('');
   const [copied, setCopied]     = useState(false);
   const [error, setError]       = useState('');
 
-  async function handleCreate() {
+  async function handleCreate(chosenSide) {
+    setSide(chosenSide);
     setStatus('creating');
     setError('');
     try {
-      const code = await createRoom(side);
+      const code = await createRoom(chosenSide);
       setRoomCode(code);
       setStatus('waiting');
     } catch (e) {
       setError(e.message);
       setStatus('idle');
+      setSide(null);
     }
   }
 
@@ -85,20 +87,34 @@ function CreateGame({ onSession, onBack }) {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  async function shareLink() {
+    const url = `${window.location.origin}${window.location.pathname}?join=${roomCode}`;
+    if (navigator.share) {
+      await navigator.share({ title: 'Bāgh Chāl', text: 'Join my Bāgh Chāl game!', url }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url).catch(() => {});
+    }
+  }
+
   if (status === 'waiting') {
+    const oppSide = side === 'goat' ? 'tiger' : 'goat';
     return (
       <div className={styles.overlay}>
         <div className={styles.waiting}>
           <p className={styles.waitingLabel}>Your room code</p>
-          <div className={styles.roomCode} onClick={copyCode} title="Click to copy">
-            {copied && <span className={styles.copied}>Copied!</span>}
-            {roomCode}
+          <div className={styles.roomCode}>{roomCode}</div>
+          <div className={styles.codeActions}>
+            <button className={styles.codeBtn} onClick={copyCode}>
+              {copied ? '✓ Copied!' : '📋 Copy Code'}
+            </button>
+            <button className={styles.codeBtn} onClick={shareLink}>📤 Share Link</button>
           </div>
-          <p className={styles.copyHint}>Click code to copy · Share it with your friend</p>
           <div className={styles.spinner} />
           <p className={styles.waitingText}>Waiting for opponent to join…</p>
-          <p className={styles.waitingText} style={{ fontSize: '0.8rem', opacity: 0.6 }}>
-            You play as <strong>{side === 'goat' ? '🐐 Goat' : '🐯 Tiger'}</strong>
+          <p className={styles.waitingText} style={{ fontSize: '0.8rem', opacity: 0.7 }}>
+            You: <strong>{side === 'goat' ? '🐐 Goat' : '🐯 Tiger'}</strong>
+            {'  ·  '}
+            Opponent: <strong>{oppSide === 'goat' ? '🐐 Goat' : '🐯 Tiger'}</strong>
           </p>
           <button className={styles.backBtn} onClick={onBack}>Cancel</button>
         </div>
@@ -106,34 +122,30 @@ function CreateGame({ onSession, onBack }) {
     );
   }
 
+  const creating = status === 'creating';
+
   return (
     <div className={styles.overlay}>
-      <div className={styles.panel}>
-        <p className={styles.panelTitle}>Create a Game</p>
-
-        <p style={{ fontSize: '0.82rem', color: '#c8a96e', textAlign: 'center' }}>Choose your side</p>
-        <div className={styles.sideRow}>
-          <button
-            className={`${styles.sideBtn} ${side === 'goat' ? styles.sideBtnActive : ''}`}
-            onClick={() => setSide('goat')}
-          >🐐 Goat</button>
-          <button
-            className={`${styles.sideBtn} ${side === 'tiger' ? styles.sideBtnActive : ''}`}
-            onClick={() => setSide('tiger')}
-          >🐯 Tiger</button>
-        </div>
-
-        {error && <p className={styles.error}>{error}</p>}
-
-        <button
-          className={styles.actionBtn}
-          onClick={handleCreate}
-          disabled={status === 'creating'}
-        >
-          {status === 'creating' ? 'Creating…' : 'Create Room'}
-        </button>
-        <button className={styles.backBtn} onClick={onBack}>← Back</button>
+      <div className={styles.heading}>
+        <h2 className={styles.title}>Create a Game</h2>
+        <p className={styles.sub}>Pick your side — friend gets the other</p>
       </div>
+
+      <div className={styles.cards}>
+        <button className={styles.card} onClick={() => handleCreate('goat')} disabled={creating}>
+          <span className={styles.cardIcon}>🐐</span>
+          <span className={styles.cardLabel}>{creating && side === 'goat' ? 'Creating…' : 'Goat'}</span>
+          <span className={styles.cardDesc}>Opponent plays Tiger</span>
+        </button>
+        <button className={styles.card} onClick={() => handleCreate('tiger')} disabled={creating}>
+          <span className={styles.cardIcon}>🐯</span>
+          <span className={styles.cardLabel}>{creating && side === 'tiger' ? 'Creating…' : 'Tiger'}</span>
+          <span className={styles.cardDesc}>Opponent plays Goat</span>
+        </button>
+      </div>
+
+      {error && <p className={styles.error}>{error}</p>}
+      <button className={styles.backBtn} onClick={onBack}>← Back</button>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useGameState } from './hooks/useGameState';
 import { useOnlineGame } from './hooks/useOnlineGame';
 import { Board } from './components/Board';
@@ -9,6 +9,7 @@ import { QuickMatch } from './components/QuickMatch';
 import { getBestTigerMove, getBestGoatPlacement, getBestGoatMove } from './utils/botLogic';
 import { getTigerMoves, getGoatMoves } from './utils/gameLogic';
 import { forfeitGame } from './lib/roomService';
+import { HelpOverlay } from './components/HelpOverlay';
 import styles from './App.module.css';
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
   const [quitTarget, setQuitTarget]         = useState(null); // 'reset' | 'mode' | null
   const [pendingBotMode, setPendingBotMode] = useState(null); // mode waiting for difficulty pick
   const [botDifficulty, setBotDifficulty]   = useState('medium');
+  const [showHelp, setShowHelp]             = useState(false);
 
   const isOnlineMode = gameMode === 'quick-match' || gameMode === 'private-match';
 
@@ -190,6 +192,23 @@ export default function App() {
     return [];
   }, [board, turn, phase, winner, isBotTurn, isMyTurn, isOnlineWaiting, selected]);
 
+  // ── Browser back button ───────────────────────────────────────────────────────
+  const backHandlerRef = useRef(null);
+  backHandlerRef.current = () => {
+    if (pendingBotMode) { setPendingBotMode(null); return; }
+    if (gameMode !== null) {
+      if (gameInProgress) { requestQuit('mode'); } else { setGameMode(null); setOnlineSession(null); }
+    }
+  };
+
+  useEffect(() => {
+    window.history.pushState(null, '');
+    const handler = () => { window.history.pushState(null, ''); backHandlerRef.current?.(); };
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ── Routing ──────────────────────────────────────────────────────────────────
   if (pendingBotMode) {
     const isVsTiger = pendingBotMode === 'bot-tiger';
@@ -222,7 +241,12 @@ export default function App() {
   }
 
   if (gameMode === null) {
-    return <ModeSelect onSelect={handleModeSelect} />;
+    return (
+      <>
+        <ModeSelect onSelect={handleModeSelect} onHelp={() => setShowHelp(true)} />
+        {showHelp && <HelpOverlay onClose={() => setShowHelp(false)} />}
+      </>
+    );
   }
 
   if (gameMode === 'quick-match' && !onlineSession) {
@@ -242,6 +266,7 @@ export default function App() {
             ? `${onlineSession?.mySide === 'goat' ? '🐐 Goat' : '🐯 Tiger'} · ${gameMode === 'quick-match' ? '⚡ Quick Match' : `🔒 ${onlineSession?.roomCode}`}`
             : 'Tigers & Goats'}
         </span>
+        <button className={styles.helpBtn} onClick={() => setShowHelp(true)} title="How to play">?</button>
       </header>
 
       <div className={styles.gameArea}>
@@ -335,6 +360,8 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {showHelp && <HelpOverlay onClose={() => setShowHelp(false)} />}
     </div>
   );
 }
