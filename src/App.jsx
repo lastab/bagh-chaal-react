@@ -18,6 +18,8 @@ export default function App() {
   const [showSideBanner, setShowSideBanner] = useState(false);
   const [showTurnBanner, setShowTurnBanner] = useState(false);
   const [quitTarget, setQuitTarget]         = useState(null); // 'reset' | 'mode' | null
+  const [pendingBotMode, setPendingBotMode] = useState(null); // mode waiting for difficulty pick
+  const [botDifficulty, setBotDifficulty]   = useState('medium');
 
   const isOnlineMode = gameMode === 'quick-match' || gameMode === 'private-match';
 
@@ -30,13 +32,23 @@ export default function App() {
           goatsToPlace, goatsCaptured, winner, forfeitedBy, handleClick, reset, botMove } = game;
 
   const handleModeSelect = (mode) => {
+    if (mode === 'bot-tiger' || mode === 'bot-goat') {
+      setPendingBotMode(mode);
+      return;
+    }
     setGameMode(mode);
     setOnlineSession(null);
     localGame.reset();
-    // Show banner for local modes immediately (no setup screen)
-    if (mode === '2player' || mode === 'bot-tiger' || mode === 'bot-goat') {
-      setShowSideBanner(true);
-    }
+    if (mode === '2player') setShowSideBanner(true);
+  };
+
+  const handleDifficultyPick = (difficulty) => {
+    setBotDifficulty(difficulty);
+    setPendingBotMode(null);
+    setGameMode(pendingBotMode);
+    setOnlineSession(null);
+    localGame.reset();
+    setShowSideBanner(true);
   };
 
   const handleOnlineSession = (roomCode, mySide) => {
@@ -63,14 +75,14 @@ export default function App() {
 
     const timer = setTimeout(() => {
       if (turn === 'tiger') {
-        const move = getBestTigerMove(board, goatsCaptured);
+        const move = getBestTigerMove(board, goatsCaptured, botDifficulty);
         if (move) botMove({ side: 'tiger', from: move.from, to: move.to });
       } else {
         if (phase === 'placement') {
-          const pos = getBestGoatPlacement(board);
+          const pos = getBestGoatPlacement(board, botDifficulty);
           if (pos) botMove({ side: 'goat', placement: pos });
         } else {
-          const move = getBestGoatMove(board);
+          const move = getBestGoatMove(board, botDifficulty);
           if (move) botMove({ side: 'goat', from: move.from, to: move.to });
         }
       }
@@ -179,6 +191,36 @@ export default function App() {
   }, [board, turn, phase, winner, isBotTurn, isMyTurn, isOnlineWaiting, selected]);
 
   // ── Routing ──────────────────────────────────────────────────────────────────
+  if (pendingBotMode) {
+    const isVsTiger = pendingBotMode === 'bot-tiger';
+    return (
+      <div className={styles.diffOverlay}>
+        <div className={styles.diffPanel}>
+          <p className={styles.diffTitle}>{isVsTiger ? '🐐 Play as Goat' : '🐯 Play as Tiger'}</p>
+          <p className={styles.diffSub}>Choose difficulty</p>
+          <div className={styles.diffRow}>
+            <button className={`${styles.diffBtn} ${styles.diffEasy}`}   onClick={() => handleDifficultyPick('easy')}>
+              <span className={styles.diffIcon}>🌱</span>
+              <span className={styles.diffLabel}>Easy</span>
+              <span className={styles.diffDesc}>Bot plays randomly</span>
+            </button>
+            <button className={`${styles.diffBtn} ${styles.diffMedium}`} onClick={() => handleDifficultyPick('medium')}>
+              <span className={styles.diffIcon}>⚔️</span>
+              <span className={styles.diffLabel}>Medium</span>
+              <span className={styles.diffDesc}>Balanced strategy</span>
+            </button>
+            <button className={`${styles.diffBtn} ${styles.diffHard}`}   onClick={() => handleDifficultyPick('hard')}>
+              <span className={styles.diffIcon}>💀</span>
+              <span className={styles.diffLabel}>Hard</span>
+              <span className={styles.diffDesc}>Always best move</span>
+            </button>
+          </div>
+          <button className={styles.diffBack} onClick={() => setPendingBotMode(null)}>← Back</button>
+        </div>
+      </div>
+    );
+  }
+
   if (gameMode === null) {
     return <ModeSelect onSelect={handleModeSelect} />;
   }

@@ -64,7 +64,7 @@ function scoreTigerMove(board, from, to) {
   return score;
 }
 
-export function getBestTigerMove(board, goatsCaptured) {
+export function getBestTigerMove(board, goatsCaptured, difficulty = 'medium') {
   const allMoves = [];
   for (let r = 0; r < 5; r++) {
     for (let c = 0; c < 5; c++) {
@@ -76,11 +76,13 @@ export function getBestTigerMove(board, goatsCaptured) {
     }
   }
   if (!allMoves.length) return null;
+  if (difficulty === 'easy') return allMoves[Math.floor(Math.random() * allMoves.length)];
 
   const scored = allMoves
     .map(m => ({ m, score: scoreTigerMove(board, m.from, m.to) }))
     .sort((a, b) => b.score - a.score);
 
+  if (difficulty === 'hard') return scored[0].m;
   return pickTopN(scored, 3, 80).m;
 }
 
@@ -112,18 +114,20 @@ function scoreGoatPlacement(board, pos) {
   return score;
 }
 
-export function getBestGoatPlacement(board) {
+export function getBestGoatPlacement(board, difficulty = 'medium') {
   const candidates = [];
   for (let r = 0; r < 5; r++)
     for (let c = 0; c < 5; c++)
       if (board[r][c] === null) candidates.push({ r, c });
 
   if (!candidates.length) return null;
+  if (difficulty === 'easy') return candidates[Math.floor(Math.random() * candidates.length)];
 
   const scored = candidates
     .map(pos => ({ pos, score: scoreGoatPlacement(board, pos) }))
     .sort((a, b) => b.score - a.score);
 
+  if (difficulty === 'hard') return scored[0].pos;
   return pickTopN(scored, 3, 50).pos;
 }
 
@@ -146,7 +150,7 @@ function scoreGoatMove(board, from, to) {
   return score;
 }
 
-export function getBestGoatMove(board) {
+export function getBestGoatMove(board, difficulty = 'medium') {
   const allMoves = [];
   for (let r = 0; r < 5; r++) {
     for (let c = 0; c < 5; c++) {
@@ -158,10 +162,12 @@ export function getBestGoatMove(board) {
     }
   }
   if (!allMoves.length) return null;
+  if (difficulty === 'easy') return allMoves[Math.floor(Math.random() * allMoves.length)];
 
   const scored = allMoves
     .map(m => ({ m, score: scoreGoatMove(board, m.from, m.to) }))
     .sort((a, b) => b.score - a.score);
 
+  if (difficulty === 'hard') return scored[0].m;
   return pickTopN(scored, 3, 80).m;
 }
