@@ -3,6 +3,16 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react':    ['react', 'react-dom'],
+          'vendor-firebase': ['firebase/app', 'firebase/database', 'firebase/auth'],
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     VitePWA({
