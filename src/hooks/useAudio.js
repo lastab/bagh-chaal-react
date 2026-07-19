@@ -9,27 +9,35 @@ const SOUNDS = {
 };
 
 export function useAudio() {
-  const [muted, setMuted] = useState(() => {
-    try { return localStorage.getItem('audio-muted') === 'true'; } catch { return false; }
+  const [musicMuted, setMusicMuted] = useState(() => {
+    try { return localStorage.getItem('audio-music-muted') === 'true'; } catch { return false; }
+  });
+  const [soundMuted, setSoundMuted] = useState(() => {
+    try { return localStorage.getItem('audio-sound-muted') === 'true'; } catch { return false; }
   });
 
-  const bgmRef    = useRef(null);
-  const mutedRef  = useRef(muted);
-  mutedRef.current = muted;
+  const bgmRef        = useRef(null);
+  const soundMutedRef = useRef(soundMuted);
+  soundMutedRef.current = soundMuted;
 
   useEffect(() => {
     const audio = new Audio(SOUNDS.bgm);
     audio.loop   = true;
     audio.volume = 0.35;
-    audio.muted  = mutedRef.current;
+    audio.muted  = musicMuted;
     bgmRef.current = audio;
     return () => { audio.pause(); audio.src = ''; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    try { localStorage.setItem('audio-muted', muted); } catch { /* ignore */ }
-    if (bgmRef.current) bgmRef.current.muted = muted;
-  }, [muted]);
+    try { localStorage.setItem('audio-music-muted', musicMuted); } catch { /* ignore */ }
+    if (bgmRef.current) bgmRef.current.muted = musicMuted;
+  }, [musicMuted]);
+
+  useEffect(() => {
+    try { localStorage.setItem('audio-sound-muted', soundMuted); } catch { /* ignore */ }
+  }, [soundMuted]);
 
   const startBgm = useCallback(() => {
     const a = bgmRef.current;
@@ -50,7 +58,7 @@ export function useAudio() {
   }, []);
 
   const playSound = useCallback((name) => {
-    if (mutedRef.current) return;
+    if (soundMutedRef.current) return;
     const src = SOUNDS[name];
     if (!src) return;
     const a = new Audio(src);
@@ -58,7 +66,8 @@ export function useAudio() {
     a.play().catch(() => {});
   }, []);
 
-  const toggleMute = useCallback(() => setMuted(m => !m), []);
+  const toggleMusic = useCallback(() => setMusicMuted(m => !m), []);
+  const toggleSound = useCallback(() => setSoundMuted(m => !m), []);
 
-  return { muted, toggleMute, startBgm, resumeBgm, stopBgm, playSound };
+  return { musicMuted, soundMuted, toggleMusic, toggleSound, startBgm, resumeBgm, stopBgm, playSound };
 }

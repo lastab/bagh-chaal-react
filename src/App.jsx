@@ -24,7 +24,7 @@ export default function App() {
   const [botDifficulty, setBotDifficulty]   = useState('medium');
   const [showHelp, setShowHelp]             = useState(false);
 
-  const { muted, toggleMute, startBgm, resumeBgm, stopBgm, playSound } = useAudio();
+  const { musicMuted, soundMuted, toggleMusic, toggleSound, startBgm, resumeBgm, stopBgm, playSound } = useAudio();
 
   const isOnlineMode = gameMode === 'quick-match' || gameMode === 'private-match';
 
@@ -131,7 +131,7 @@ export default function App() {
     if (gameMode && !winner) resumeBgm();
     else if (!gameMode || winner) stopBgm();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameMode, winner, muted]);
+  }, [gameMode, winner, musicMuted]);
 
   // Auto-redirect to Quick Match when opponent leaves
   useEffect(() => {
@@ -305,8 +305,11 @@ export default function App() {
             ? `${onlineSession?.mySide === 'goat' ? '🐐 Goat' : '🐯 Tiger'} · ${gameMode === 'quick-match' ? '⚡ Quick Match' : `🔒 ${onlineSession?.roomCode}`}`
             : 'Tigers & Goats'}
         </span>
-        <button className={styles.muteBtn} onClick={toggleMute} title={muted ? 'Unmute' : 'Mute'}>
-          {muted ? '🔇' : '🔊'}
+        <button className={`${styles.muteBtn} ${musicMuted ? styles.muteBtnOff : ''}`} onClick={toggleMusic} title={musicMuted ? 'Unmute music' : 'Mute music'}>
+          🎵
+        </button>
+        <button className={styles.muteBtn} onClick={toggleSound} title={soundMuted ? 'Unmute sounds' : 'Mute sounds'}>
+          {soundMuted ? '🔇' : '🔊'}
         </button>
         <button className={styles.helpBtn} onClick={() => setShowHelp(true)} title="How to play">?</button>
       </header>
