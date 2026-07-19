@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getDatabase } from 'firebase/database';
+import { getAuth, signInAnonymously } from 'firebase/auth';
 
 const config = {
   apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
@@ -14,4 +15,12 @@ const config = {
 export const isFirebaseConfigured = Boolean(config.databaseURL);
 
 const app = isFirebaseConfigured ? initializeApp(config) : null;
-export const db  = app ? getDatabase(app) : null;
+export const db   = app ? getDatabase(app) : null;
+export const auth = app ? getAuth(app) : null;
+
+export async function ensureAuth() {
+  if (!auth) return null;
+  if (auth.currentUser) return auth.currentUser.uid;
+  const cred = await signInAnonymously(auth);
+  return cred.user.uid;
+}

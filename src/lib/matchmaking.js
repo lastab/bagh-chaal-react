@@ -1,11 +1,10 @@
 import { ref, set, get, update, remove, onValue } from 'firebase/database';
-import { db } from './firebase';
+import { db, ensureAuth } from './firebase';
 import { createInitialBoard } from '../utils/gameLogic';
 
 const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const QUEUE_TTL = 90_000;
 
-function genId()   { return Math.random().toString(36).slice(2, 10); }
 function genCode() { return Array.from({ length: 6 }, () => CHARS[Math.floor(Math.random() * CHARS.length)]).join(''); }
 
 function freshGameState() {
@@ -38,7 +37,7 @@ function resolveSides(mySide, oppSide) {
 // Returns { myId, roomCode, resolvedSide }
 // resolvedSide is null while waiting in queue (for 'random' players)
 export async function searchForMatch(mySide) {
-  const myId = genId();
+  const myId = await ensureAuth();
   const now  = Date.now();
 
   const snap = await get(ref(db, 'quickmatch'));
